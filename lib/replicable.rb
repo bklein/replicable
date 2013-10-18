@@ -1,4 +1,5 @@
 require "replicable/version"
+require "replicable/railtie" if defined?(Rails)
 
 module Replicable
 

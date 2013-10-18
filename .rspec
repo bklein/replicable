@@ -1,0 +1,4 @@
+--color
+--format html
+--out "tmp/rspec_report.html"
+--format doc
