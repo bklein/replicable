@@ -1,6 +1,6 @@
 # Replicable
 
-TODO: Write a gem description
+ActiveRecord extension that allows JSON import/export with nested attributes/associations.
 
 ## Installation
 
