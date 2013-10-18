@@ -1,3 +1,1 @@
-require 'replicable'
-
-
+require 'support/active_record'
