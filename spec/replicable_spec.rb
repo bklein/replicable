@@ -3,6 +3,15 @@ require 'pry'
 
 describe Replicable do
 
+  def reset_models
+    # reset all settings each time
+    [Ship, Pirate, Parrot].each do |model|
+      model.attr_replicable
+      model.has_many_replicable
+      model.has_one_replicable
+    end
+  end
+
   before :all do
     Pirate.send :include, Replicable
   end
@@ -79,12 +88,7 @@ describe Replicable do
   describe "#replicate_as_json" do
     
     before :each do
-      # reset all settings each time
-      [Ship, Pirate, Parrot].each do |model|
-        model.attr_replicable
-        model.has_many_replicable
-        model.has_one_replicable
-      end
+      reset_models
     end
 
     it "produces a hash of of the model's attributes" do
@@ -227,6 +231,87 @@ describe Replicable do
   end
 
   describe "#replicate_from_json" do
+    before :each do
+      reset_models
+    end
+
+    it "instantiates attributes from hash" do
+      Pirate.attr_replicable :name, :age
+      json = {
+        "name" => "Reborn Blackbeard",
+        "age" => 12
+      }
+      pirate = Pirate.new.replicate_from_json json
+      pirate.name.should eq "Reborn Blackbeard"
+      pirate.age.should eq 12
+    end
+
+    it "builds one_to_one association from hash" do
+      Pirate.has_one_replicable :parrot
+      Parrot.attr_replicable :name, :color
+      json = {
+        "parrot_attributes" => {
+          "name" => "Samuel",
+          "color" => "Cerulean Frost"
+        }
+      }
+
+      pirate = Pirate.new.replicate_from_json json
+      pirate.parrot.should be_present
+      pirate.parrot.name.should eq "Samuel"
+      pirate.parrot.color.should eq "Cerulean Frost"
+    end
+
+    it "builds one_to_many collection from hash" do
+      Ship.has_many_replicable :pirates
+      Pirate.attr_replicable :name, :age
+    end
+
+    it "builds nested models from nested hashes" do
+      Ship.attr_replicable :name
+      Ship.has_many_replicable :pirates
+
+      Pirate.attr_replicable :name, :age
+      Pirate.has_one_replicable :parrot
+
+      Parrot.attr_replicable :name, :color
+
+      json = {
+        "name"=>"Magestic Sea",
+        "pirates_attributes"=>
+        [
+          {"name"=>"Blackbeard Clone 0",
+           "age"=>0,
+           "parrot_attributes"=> {"name"=>"Ex-parrot for Blackbeard Clone 0", "color"=>"Burnt Sienna"}},
+          {"name"=>"Blackbeard Clone 1",
+           "age"=>1,
+           "parrot_attributes"=> {"name"=>"Ex-parrot for Blackbeard Clone 1", "color"=>"Chartreuse"}}
+        ]
+      }
+
+      ship = Ship.new.replicate_from_json json
+
+      ship.name.should eq "Magestic Sea"
+      ship.pirates.should be_present
+      ship.pirates.first.tap do |first_pirate|
+        first_pirate.name.should eq "Blackbeard Clone 0"
+        first_pirate.age.should eq 0
+        first_pirate.parrot.should be_present
+        first_pirate.parrot.tap do |p|
+          p.name.should eq "Ex-parrot for Blackbeard Clone 0"
+          p.color.should eq "Burnt Sienna"
+        end
+      end
+      ship.pirates.last.tap do |last_pirate|
+        last_pirate.name.should eq "Blackbeard Clone 1"
+        last_pirate.age.should eq 1
+        last_pirate.parrot.should be_present
+        last_pirate.parrot.tap do |p|
+          p.name.should eq "Ex-parrot for Blackbeard Clone 1"
+          p.color.should eq "Chartreuse"
+        end
+      end
+    end
 
   end
 

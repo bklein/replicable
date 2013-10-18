@@ -8,15 +8,15 @@ ActiveRecord::Base.establish_connection adapter: 'sqlite3', database: ':memory:'
 ActiveRecord::Schema.define do
   self.verbose = false
 
+  create_table :ships, force: true do |t|
+    t.string :name
+    t.timestamps
+  end
+
   create_table :pirates, force: true do |t|
     t.string :name
     t.integer :age
     t.integer :ship_id
-    t.timestamps
-  end
-
-  create_table :ships, force: true do |t|
-    t.string :name
     t.timestamps
   end
 
