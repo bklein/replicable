@@ -157,6 +157,71 @@ describe Replicable do
       }
 
       pirate.replicate_as_json.should eq expected_json
+
+    end
+
+    it "produces a nested hash of everything" do
+      Ship.attr_replicable :name
+      Ship.has_many_replicable :pirates
+
+      Pirate.attr_replicable :name, :age
+      Pirate.has_one_replicable :parrot
+
+      Parrot.attr_replicable :name, :color
+
+      ship = Ship.create!.tap do |s|
+        s.name = "Magestic Sea"
+      end
+
+      10.times do |n|
+        ship.pirates.create!.tap do |p|
+          p.name = "Blackbeard Clone #{ n }"
+          p.age = n
+          p.create_parrot!.tap do |bird|
+            bird.name = "Ex-parrot for Blackbeard Clone #{ n }"
+            bird.color = "Burnt Sienna"
+          end
+        end
+      end
+
+      expected_json = {
+        "name"=>"Magestic Sea",
+        "pirates_attributes"=>
+        [
+          {"name"=>"Blackbeard Clone 0",
+           "age"=>0,
+           "parrot_attributes"=> {"name"=>"Ex-parrot for Blackbeard Clone 0", "color"=>"Burnt Sienna"}},
+          {"name"=>"Blackbeard Clone 1",
+           "age"=>1,
+           "parrot_attributes"=> {"name"=>"Ex-parrot for Blackbeard Clone 1", "color"=>"Burnt Sienna"}},
+          {"name"=>"Blackbeard Clone 2",
+           "age"=>2,
+           "parrot_attributes"=> {"name"=>"Ex-parrot for Blackbeard Clone 2", "color"=>"Burnt Sienna"}},
+          {"name"=>"Blackbeard Clone 3",
+           "age"=>3,
+           "parrot_attributes"=> {"name"=>"Ex-parrot for Blackbeard Clone 3", "color"=>"Burnt Sienna"}},
+          {"name"=>"Blackbeard Clone 4",
+           "age"=>4,
+           "parrot_attributes"=> {"name"=>"Ex-parrot for Blackbeard Clone 4", "color"=>"Burnt Sienna"}},
+          {"name"=>"Blackbeard Clone 5",
+           "age"=>5,
+           "parrot_attributes"=> {"name"=>"Ex-parrot for Blackbeard Clone 5", "color"=>"Burnt Sienna"}},
+          {"name"=>"Blackbeard Clone 6",
+           "age"=>6,
+           "parrot_attributes"=> {"name"=>"Ex-parrot for Blackbeard Clone 6", "color"=>"Burnt Sienna"}},
+          {"name"=>"Blackbeard Clone 7",
+           "age"=>7,
+           "parrot_attributes"=> {"name"=>"Ex-parrot for Blackbeard Clone 7", "color"=>"Burnt Sienna"}},
+          {"name"=>"Blackbeard Clone 8",
+           "age"=>8,
+           "parrot_attributes"=> {"name"=>"Ex-parrot for Blackbeard Clone 8", "color"=>"Burnt Sienna"}},
+          {"name"=>"Blackbeard Clone 9",
+           "age"=>9,
+           "parrot_attributes"=> {"name"=>"Ex-parrot for Blackbeard Clone 9", "color"=>"Burnt Sienna"}}
+        ]
+      }
+
+      ship.replicate_as_json.should eq expected_json
     end
 
   end
