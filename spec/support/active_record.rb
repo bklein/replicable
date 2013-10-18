@@ -5,22 +5,27 @@ require 'replicable'
 
 ActiveRecord::Base.establish_connection adapter: 'sqlite3', database: ':memory:'
 
-ActiveRecord::Migration.create_table :pirates do |t|
-  t.string :name
-  t.integer :age
-  t.integer :ship_id
-  t.timestamps
-end
+ActiveRecord::Schema.define do
+  self.verbose = false
 
-ActiveRecord::Migration.create_table :ships do |t|
-  t.string :name
-  t.timestamps
-end
+  create_table :pirates, force: true do |t|
+    t.string :name
+    t.integer :age
+    t.integer :ship_id
+    t.timestamps
+  end
 
-ActiveRecord::Migration.create_table :parrots do |t|
-  t.string :name
-  t.string :color
-  t.integer :pirate_id
+  create_table :ships, force: true do |t|
+    t.string :name
+    t.timestamps
+  end
+
+  create_table :parrots, force: true do |t|
+    t.string :name
+    t.string :color
+    t.integer :pirate_id
+  end
+
 end
 
 class Ship < ActiveRecord::Base
