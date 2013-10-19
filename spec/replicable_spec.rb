@@ -265,6 +265,25 @@ describe Replicable do
     it "builds one_to_many collection from hash" do
       Ship.has_many_replicable :pirates
       Pirate.attr_replicable :name, :age
+      json = {
+        "pirates_attributes" => [
+          { "name" => "Blackbeard", "age" => 42 },
+          { "name" => "Redbeard", "age" => 314 },
+          { "name" => "Bluebeard", "age" => 2 }
+        ]
+      }
+
+      ship = Ship.new.replicate_from_json json
+
+      ship.pirates.should be_present
+      ship.pirates.length.should eq 3
+
+      ship.pirates[0].name.should eq "Blackbeard"
+      ship.pirates[0].age.should eq 42
+      ship.pirates[1].name.should eq "Redbeard"
+      ship.pirates[1].age.should eq 314
+      ship.pirates[2].name.should eq "Bluebeard"
+      ship.pirates[2].age.should eq 2
     end
 
     it "builds nested models from nested hashes" do
