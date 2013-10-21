@@ -23,7 +23,7 @@ module Replicable
       end
       attr_accessible(*one_to_many_associations.map{|association| "#{ association }_attributes" }, as: :replicable)
       one_to_many_associations.each do |association|
-        unless new.respond_to? "#{ association }_attributes".to_sym
+        unless instance_methods.include? "#{ association }_attributes=".to_sym
           accepts_nested_attributes_for association
         end
       end
@@ -35,7 +35,7 @@ module Replicable
       end
       attr_accessible(*one_to_one_associations.map{|association| "#{ association }_attributes" }, as: :replicable)
       one_to_one_associations.each do |association|
-        unless new.respond_to? "#{ association }_attributes".to_sym
+        unless instance_methods.include? "#{ association }_attributes=".to_sym
           accepts_nested_attributes_for association
         end
       end
